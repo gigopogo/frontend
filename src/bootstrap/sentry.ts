@@ -12,7 +12,7 @@ import { store } from 'src/pages/createStore';
 export const initializeSentryLogging = () => {
   if (!Constants.sentryDsn) {
     return;
-  }
+  }``
   Sentry.init({
     dsn: Constants.sentryDsn,
     environment: Constants.sourceAcademyEnvironment,
@@ -31,3 +31,4 @@ export const initializeSentryLogging = () => {
   const userId = store.getState().session.userId;
   Sentry.setUser(typeof userId !== 'undefined' ? { id: userId.toString() } : null);
 };
+  
