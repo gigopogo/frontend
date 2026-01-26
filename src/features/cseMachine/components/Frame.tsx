@@ -46,7 +46,8 @@ export class Frame extends Visible implements IHoverable {
   readonly totalHeight: number;
   /** width of this frame + max width of the bound values */
   readonly totalWidth: number;
-
+  /** width of data beside this frame */
+  public totalDataWidth: number = 0;
   /** the bindings this frame contains */
   readonly bindings: Binding[] = [];
   /** name of this frame to display */
@@ -74,7 +75,7 @@ export class Frame extends Visible implements IHoverable {
     Frame.envFrameMap.set(this.environment.id, this);
 
     this._x = this.leftSiblingFrame
-      ? this.leftSiblingFrame.x() + this.leftSiblingFrame.totalWidth + Config.FrameMarginX
+      ? this.leftSiblingFrame.x() + this.leftSiblingFrame.totalWidth + this.leftSiblingFrame.totalDataWidth + Config.FrameMarginX
       : this.level.x();
     // ensure x coordinate cannot be less than that of parent frame
     if (this.parentFrame) this._x = Math.max(this._x, this.parentFrame.x());
@@ -150,6 +151,14 @@ export class Frame extends Visible implements IHoverable {
           );
       }
       this._width = Math.max(this._width, bindingTextWidth + Config.FramePaddingX * 2);
+     
+      if (isDataArray(data.value)) {
+        const dataPredictedWidth = data.value.length * Config.DataUnitWidth;
+        console.log('dataWidth:', dataPredictedWidth);
+        this.totalDataWidth = Math.max(this.totalDataWidth, dataPredictedWidth);  
+      }
+    
+
       totalWidth = Math.max(totalWidth, this._width + Config.FrameMinGapX);
     }
 
