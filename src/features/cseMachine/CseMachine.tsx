@@ -43,6 +43,19 @@ export default class CseMachine {
     CseMachine.redraw();
   }
 
+  public static setHideDeadFrames(enabled: boolean): void {
+    Layout.hideDeadFrames = enabled;
+  }
+  public static clearCachedLayouts(): void {
+    Layout.currentLight = undefined;
+    Layout.currentDark = undefined;
+    Layout.currentStackDark = undefined;
+    Layout.currentStackTruncDark = undefined;
+    Layout.currentStackLight = undefined;
+    Layout.currentStackTruncLight = undefined;
+    Layout.prevLayout = undefined;
+    Layout.key = 0;
+  }
   public static getCurrentEnvId(): string {
     return CseMachine.currentEnvId;
   }
@@ -55,7 +68,7 @@ export default class CseMachine {
   public static getStackTruncated(): boolean {
     return CseMachine.stackTruncated;
   }
-  // added for center alignment
+    // added for center alignment
   public static getCenterAlignment(): boolean {
     return CseMachine.centerAlignment;
   }
@@ -93,6 +106,7 @@ export default class CseMachine {
       throw new Error('CSE machine not initialized');
     CseMachine.control = context.runtime.control;
     CseMachine.stash = context.runtime.stash;
+    CseMachine.setHideDeadFrames(false);
 
     Layout.setContext(
       context.runtime.environmentTree as EnvTree,
@@ -100,7 +114,7 @@ export default class CseMachine {
       context.runtime.stash,
       context.chapter
     );
-    // get ghost layout on first run (when user press run and code changes)
+     // get ghost layout on first run (when user press run and code changes)
     if (!CseMachine.masterLayout) {
        Layout.setContext(
           context.runtime.environmentTree as EnvTree,
@@ -127,20 +141,10 @@ export default class CseMachine {
   static redraw() {
     if (CseMachine.environmentTree && CseMachine.control && CseMachine.stash) {
       // checks if the required diagram exists, and updates the dom node using setVis
-
-      if (CseMachine.getCenterAlignment() || !CseMachine.getCenterAlignment()) {
-        Layout.setContext(CseMachine.environmentTree, CseMachine.control, CseMachine.stash);
-        if (CseMachine.masterLayout) {
-            Layout.applyFixedPositions();
-        }
-        this.setVis(Layout.draw());
-      }
-
       if (
         CseMachine.getPrintableMode() &&
         CseMachine.getControlStash() &&
         CseMachine.getStackTruncated() &&
-        // !CseMachine.getCenterAlignment() && // added for center alignment
         Layout.currentStackTruncLight !== undefined
       ) {
         this.setVis(Layout.currentStackTruncLight);
@@ -148,7 +152,6 @@ export default class CseMachine {
         CseMachine.getPrintableMode() &&
         CseMachine.getControlStash() &&
         !CseMachine.getStackTruncated() &&
-        // !CseMachine.getCenterAlignment() && // added for center alignment
         Layout.currentStackLight !== undefined
       ) {
         this.setVis(Layout.currentStackLight);
@@ -156,7 +159,6 @@ export default class CseMachine {
         !CseMachine.getPrintableMode() &&
         CseMachine.getControlStash() &&
         CseMachine.getStackTruncated() &&
-        // !CseMachine.getCenterAlignment() && // added for center alignment
         Layout.currentStackTruncDark !== undefined
       ) {
         this.setVis(Layout.currentStackTruncDark);
@@ -164,27 +166,24 @@ export default class CseMachine {
         !CseMachine.getPrintableMode() &&
         CseMachine.getControlStash() &&
         !CseMachine.getStackTruncated() &&
-        // !CseMachine.getCenterAlignment() && // added for center alignment
         Layout.currentStackDark !== undefined
       ) {
         this.setVis(Layout.currentStackDark);
       } else if (
         CseMachine.getPrintableMode() &&
         !CseMachine.getControlStash() &&
-        // !CseMachine.getCenterAlignment() && // added for center alignment
         Layout.currentLight !== undefined
       ) {
         this.setVis(Layout.currentLight);
       } else if (
         !CseMachine.getPrintableMode() &&
         !CseMachine.getControlStash() &&
-        // !CseMachine.getCenterAlignment() && // added for center alignment
         Layout.currentDark !== undefined
       ) {
         this.setVis(Layout.currentDark);
       } else {
         Layout.setContext(CseMachine.environmentTree, CseMachine.control, CseMachine.stash);
-        if (CseMachine.masterLayout) {
+         if (CseMachine.masterLayout) {
             Layout.applyFixedPositions();
             // Layout.applyFixedPositions(CseMachine.masterLayout);
         }
@@ -207,6 +206,9 @@ export default class CseMachine {
       CseMachine.control = undefined;
       CseMachine.stash = undefined;
     }
+    CseMachine.setHideDeadFrames(false);
+    CseMachine.clearCachedLayouts();
     this.clear();
   }
 }
+
