@@ -53,8 +53,8 @@ import {
 import { Continuation, isContinuation, isSchemeNumber, isSymbol } from './utils/scheme';
 export type LayoutCache = {
   frames: Map<string, number>;
-  levels: Map<string,  number>; // added to store frame's level
-  largestWidth: number; // added to store largest level width
+  levelWidth: Map<string,  number>;
+  largestWidth: number; 
 }
 
 /** this class encapsulates the logic for calculating the layout */
@@ -617,23 +617,25 @@ export class Layout {
   /**
    * Populate cache with final x coordinates of each frame, width of each level, and largest level width, 
    * to be used for fixed positioning of frames and center alignment.
+   * @param controlStash whether the control stash is enabled
    */
-  static getLayoutPositions(): LayoutCache {
+  static getLayoutPositions(controlStash : boolean): LayoutCache {
     const cache: LayoutCache = { 
         frames: new Map(), 
-        levels: new Map(),
-        largestWidth: 0
+        levelWidth: new Map(),
+        largestWidth: 0,
     };
     Layout.levels.forEach(level => {
       const frames = level.frames;
+      const controlStashOffset = ControlStashConfig.ControlPosX + ControlStashConfig.ControlItemWidth;
+      const offset = controlStash ? controlStashOffset : 0;
       const currWidth = level.width() + frames[frames.length - 1].totalDataWidth;
       cache.largestWidth = Math.max(cache.largestWidth, currWidth);
       frames.forEach(frame => {
-          cache.frames.set(frame.environment.id, frame.x());
-          cache.levels.set(frame.environment.id, currWidth);
+          cache.frames.set(frame.environment.id, frame.x() - offset);
+          cache.levelWidth.set(frame.environment.id, currWidth);
       });
     });
-
     return cache;
   }
 
@@ -649,7 +651,7 @@ export class Layout {
       // add offset for control stash and center alignment
       let offset: number = 0; 
       offset += CseMachine.getControlStash() ? ControlStashConfig.ControlPosX + ControlStashConfig.ControlItemWidth : 0;
-      offset += CseMachine.getCenterAlignment() ? Math.floor((cache.largestWidth - cache.levels.get(envId)!) / 2) : 0;
+      offset += CseMachine.getCenterAlignment() ? Math.floor((cache.largestWidth - cache.levelWidth.get(envId)!) / 2) : 0;
       return fixedX + offset;
     }
     return undefined; 
@@ -666,6 +668,9 @@ export class Layout {
         if (cache.frames.has(id)) {
           const fixedX = Layout.getGhostFrameX(id)!;
           frame.x = () => fixedX;
+          frame.bindings.forEach(binding => {
+             binding.reassignCoordinates(fixedX);
+          });
           // frame.name = new Text(
           //   frame.name.data(), // getter not implemented
           //   frame.x(),

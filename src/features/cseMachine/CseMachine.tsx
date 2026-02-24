@@ -102,14 +102,13 @@ export default class CseMachine {
     );
     // get ghost layout on first run (when user press run and code changes)
     if (!CseMachine.masterLayout) {
-       Layout.setContext(
-          context.runtime.environmentTree as EnvTree,
-          context.runtime.control,
-          context.runtime.stash,
-          context.chapter
-       );
-
-       CseMachine.masterLayout = Layout.getLayoutPositions();
+      Layout.setContext(
+        context.runtime.environmentTree as EnvTree,
+        context.runtime.control,
+        context.runtime.stash,
+        context.chapter
+      );
+      CseMachine.masterLayout = Layout.getLayoutPositions(this.controlStash);
     }
 
     // Apply Fixed Positions
