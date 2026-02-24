@@ -51,8 +51,6 @@ import {
   setDifference
 } from './CseMachineUtils';
 import { Continuation, isContinuation, isSchemeNumber, isSymbol } from './utils/scheme';
-import { number$45$$62$string } from 'js-slang/dist/alt-langs/scheme/scm-slang/src/stdlib/base';
-
 export type LayoutCache = {
   frames: Map<string, number>;
   levels: Map<string,  number>; // added to store frame's level
@@ -661,13 +659,19 @@ export class Layout {
    * Reassign x coordinate of every frame to their predetermined position by calling getGhostFrameX.
    */
   static applyFixedPositions() {
-    const cache = CseMachine.masterLayout!;
+    const cache = CseMachine.masterLayout!; // getLayoutPositions() must have been called before
     Layout.levels.forEach(level => {
       level.frames.forEach(frame => {
         const id = frame.environment.id;
         if (cache.frames.has(id)) {
           const fixedX = Layout.getGhostFrameX(id)!;
           frame.x = () => fixedX;
+          // frame.name = new Text(
+          //   frame.name.data(), // getter not implemented
+          //   frame.x(),
+          //   frame.level.y(),
+          //   { maxWidth: frame.width(), faded: !frame.isLive }
+          // );
         }
       });
     });

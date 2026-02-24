@@ -134,7 +134,7 @@ export default class CseMachine {
           this.setVis(Layout.draw());
         }
         this.centerAlignmentToggled = false;
-    }
+      }
 
       if (
         CseMachine.getPrintableMode() &&
