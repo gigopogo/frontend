@@ -53,7 +53,7 @@ export class Frame extends Visible implements IHoverable {
   /** the bindings this frame contains */
   readonly bindings: Binding[] = [];
   /** name of this frame to display */
-  readonly name: Text;
+  name: Text; // removed readonly to allow reassignment for fixed layout
   /** the level in which this frame resides */
   readonly level: Level | undefined;
   /** environment associated with this frame */
@@ -265,6 +265,25 @@ export class Frame extends Visible implements IHoverable {
   onMouseEnter = () => {};
 
   onMouseLeave = () => {};
+
+  /**
+   * Reassigns the coordinates according to the final position of this frame
+   * @param newX taken from cached layout
+   */
+  reassignCoordinates(newX : number): void {
+    this._x = newX;
+
+    let textOffset = 0;
+    if (CseMachine.getCenterAlignment()) {
+      textOffset += Math.floor(this.width() / 2) - Math.floor(this.name.width() / 2);
+    }
+    this.name = new Text(
+      frameNames.get(this.environment.name) ?? this.environment.name,
+      this.x() + textOffset,
+      this.level!.y(), // this method is only called after the frame is drawn
+      { maxWidth: this.width(), faded: !this.isLive }
+    );
+  }
 
   draw(): React.ReactNode {
     return (

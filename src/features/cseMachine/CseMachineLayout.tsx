@@ -667,16 +667,10 @@ export class Layout {
         const id = frame.environment.id;
         if (cache.frames.has(id)) {
           const fixedX = Layout.getGhostFrameX(id)!;
-          frame.x = () => fixedX;
+          frame.reassignCoordinates(fixedX);
           frame.bindings.forEach(binding => {
-             binding.reassignCoordinates(fixedX);
+            binding.reassignCoordinates(fixedX);
           });
-          // frame.name = new Text(
-          //   frame.name.data(), // getter not implemented
-          //   frame.x(),
-          //   frame.level.y(),
-          //   { maxWidth: frame.width(), faded: !frame.isLive }
-          // );
         }
       });
     });
